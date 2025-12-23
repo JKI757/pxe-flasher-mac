@@ -1,0 +1,23 @@
+id: "sample-device"
+name: "Sample Device (HTTP-only demo)"
+description: "Minimal profile for GUI debugging"
+network:
+  server_ip: "192.168.77.1"
+  cidr: "192.168.77.1/24"
+  pool_start: "192.168.77.50"
+  pool_end: "192.168.77.200"
+  lease_seconds: 600
+boot:
+  mode: "httpboot"
+  http_root: "http"
+artifacts:
+  http_files:
+    - "installer/vmlinuz"
+    - "installer/initrd.img"
+    - "images/sample.img.zst"
+imaging:
+  mode: "network_install"
+  network_install:
+    kernel: "installer/vmlinuz"
+    initrd: "installer/initrd.img"
+    cmdline_template: "console=ttyS0 ip=dhcp inst.repo=http://{server_ip}/repo"

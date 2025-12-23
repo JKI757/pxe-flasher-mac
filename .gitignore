@@ -1,0 +1,21 @@
+# Build artifacts
+dist/
+bin/
+*.app
+*.dmg
+*.pkg
+*.zip
+*.test
+*.out
+*.exe
+
+# Runtime data
+runs/
+logs/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.tmp
