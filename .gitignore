@@ -19,3 +19,6 @@ logs/
 .vscode/
 *.swp
 *.tmp
+
+# Local notes (not for commit)
+docs/private/

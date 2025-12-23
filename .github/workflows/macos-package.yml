@@ -54,7 +54,8 @@ jobs:
           go build -o dist/flasher-helper ./cmd/flasher-helper
       - name: Package app
         run: |
-          fyne package -os darwin -src ./cmd/flasher-gui -name "Netboot Flasher" -appID "com.netbootflasher.app" -icon assets/icon.png
+          ICON_PATH="$(pwd)/assets/icon.png"
+          fyne package -os darwin -src ./cmd/flasher-gui -name "Netboot Flasher" -appID "com.netbootflasher.app" -icon "$ICON_PATH"
           mkdir -p dist
           mv "Netboot Flasher.app" dist/
       - name: Codesign app + helper
