@@ -25,12 +25,15 @@ jobs:
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
           go install fyne.io/fyne/v2/cmd/fyne@v2.4.5
       - name: Import signing certificate
-        if: ${{ secrets.APPLE_CERT_P12 != '' }}
         env:
           APPLE_CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
           APPLE_CERT_P12_PASSWORD: ${{ secrets.APPLE_CERT_P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         run: |
+          if [ -z "$APPLE_CERT_P12" ]; then
+            echo "Skipping signing key import; APPLE_CERT_P12 not set."
+            exit 0
+          fi
           if [ -z "$KEYCHAIN_PASSWORD" ]; then
             KEYCHAIN_PASSWORD="build-keychain-pass"
           fi
@@ -57,10 +60,13 @@ jobs:
           mkdir -p dist
           mv "Netboot Flasher.app" dist/
       - name: Codesign app + helper
-        if: ${{ secrets.APPLE_CERT_P12 != '' && secrets.APPLE_CERT_ID != '' }}
         env:
           APPLE_CERT_ID: ${{ secrets.APPLE_CERT_ID }}
         run: |
+          if [ -z "$APPLE_CERT_ID" ]; then
+            echo "Skipping codesign; APPLE_CERT_ID not set."
+            exit 0
+          fi
           codesign --force --deep --options runtime --sign "$APPLE_CERT_ID" "dist/Netboot Flasher.app"
           codesign --force --options runtime --sign "$APPLE_CERT_ID" dist/flasher-helper
           codesign --verify --deep --strict --verbose=2 "dist/Netboot Flasher.app"
@@ -69,12 +75,15 @@ jobs:
         run: |
           hdiutil create -volname "Netboot Flasher" -srcfolder "dist/Netboot Flasher.app" -ov -format UDZO "dist/Netboot-Flasher.dmg"
       - name: Notarize DMG
-        if: ${{ secrets.APPLE_ID != '' && secrets.APPLE_APP_PASSWORD != '' && secrets.APPLE_TEAM_ID != '' }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          if [ -z "$APPLE_ID" ] || [ -z "$APPLE_APP_PASSWORD" ] || [ -z "$APPLE_TEAM_ID" ]; then
+            echo "Skipping notarization; Apple ID secrets not set."
+            exit 0
+          fi
           xcrun notarytool submit "dist/Netboot-Flasher.dmg" --apple-id "$APPLE_ID" --password "$APPLE_APP_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
           xcrun stapler staple "dist/Netboot-Flasher.dmg"
       - name: Upload artifacts
