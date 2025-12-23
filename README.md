@@ -3,7 +3,7 @@
 This repository implements a macOS desktop tool that turns a Mac into a
 profile-driven netboot flashing station. Includes profile loading, artifact
 validation, manifest generation, and HTTP/DHCP/TFTP servers for serving netboot
-artifacts.
+artifacts. 
 
 ## Requirements
 - Go 1.24+
