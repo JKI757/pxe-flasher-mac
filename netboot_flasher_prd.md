@@ -331,7 +331,7 @@ netboot-flasher/
 - [ ] Add CI:
   - [x] `go test ./...`
   - [ ] `golangci-lint`
-  - [x] dependency license gate (see 13.2)
+  - [ ] dependency license gate (see 13.2)
   - [x] macOS package (app + dmg)
   - [x] codesign + notarize when secrets are configured
 

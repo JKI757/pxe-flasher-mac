@@ -6,7 +6,12 @@ if ! command -v go >/dev/null 2>&1; then
   exit 1
 fi
 
-go list -m -json all | python3 - <<'PY'
+mod_flag=()
+if [ -d vendor ] && [[ "${GOFLAGS:-}" != *"-mod="* ]]; then
+  mod_flag=(-mod=mod)
+fi
+
+go list "${mod_flag[@]}" -m -json all | python3 - <<'PY'
 import json
 import os
 import re
