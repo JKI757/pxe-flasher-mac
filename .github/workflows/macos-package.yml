@@ -4,12 +4,17 @@ on:
   push:
     branches:
       - main
+      - master
+    tags:
+      - "v*"
   pull_request:
   workflow_dispatch:
 
 jobs:
   build-macos:
     runs-on: macos-latest
+    permissions:
+      contents: write
     env:
       GOFLAGS: -ldflags=-linkmode=external
     steps:
@@ -73,6 +78,9 @@ jobs:
       - name: Create DMG
         run: |
           hdiutil create -volname "Netboot Flasher" -srcfolder "dist/Netboot Flasher.app" -ov -format UDZO "dist/Netboot-Flasher.dmg"
+      - name: Zip app bundle
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent "dist/Netboot Flasher.app" "dist/Netboot-Flasher.app.zip"
       - name: Notarize DMG
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -85,6 +93,14 @@ jobs:
           fi
           xcrun notarytool submit "dist/Netboot-Flasher.dmg" --apple-id "$APPLE_ID" --password "$APPLE_APP_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
           xcrun stapler staple "dist/Netboot-Flasher.dmg"
+      - name: Publish release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Netboot-Flasher.dmg
+            dist/Netboot-Flasher.app.zip
+            dist/flasher-helper
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -92,4 +108,5 @@ jobs:
           path: |
             "dist/Netboot Flasher.app"
             dist/Netboot-Flasher.dmg
+            dist/Netboot-Flasher.app.zip
             dist/flasher-helper
